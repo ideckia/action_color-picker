@@ -1,0 +1,112 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+
+  create_release:
+    name: Create release
+    runs-on: ubuntu-latest
+    # Note this. We are going to use that in further jobs.
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+    - name: Create release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+  release_assets:
+    name: Release assets
+    needs: create_release # we need to know the upload URL
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        os: 
+          - linux
+          - win
+          - macos
+
+        include:
+        - os: linux
+          NATIVE_LIBNUT_FOLDER: linux
+
+        - os: win
+          NATIVE_LIBNUT_FOLDER: win32
+
+        - os: macos
+          NATIVE_LIBNUT_FOLDER: darwin
+
+    env:
+      CMD_NAME: color-picker
+      HAXE_VERSION: latest
+      NODE_VERSION: 16
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    - name: Install lix, haxe ${{ env.HAXE_VERSION }} and dependencies
+      run: |
+            npm i -g lix
+            lix install haxe ${{ env.HAXE_VERSION }}
+            lix download
+
+    - name: Compile project
+      run: haxe deploy.hxml
+
+    - name: Install node.js dependencies
+      run: npm install
+
+    - name: Get the compiled NutJs
+      run: |
+        mkdir node_mod
+        mkdir node_mod/@nut-tree
+        
+        cp -r node_modules/@nut-tree/libnut node_mod/@nut-tree
+        cp -r node_modules/bindings node_mod/
+        cp -r node_modules/file-uri-to-path node_mod/
+        
+        mkdir -p node_mod/@nut-tree/libnut-${{ matrix.NATIVE_LIBNUT_FOLDER }}/build/Release
+        cp node_modules/@nut-tree/libnut-${{ matrix.NATIVE_LIBNUT_FOLDER }}/index.js node_mod/@nut-tree/libnut-${{ matrix.NATIVE_LIBNUT_FOLDER }}
+        cp node_modules/@nut-tree/libnut-${{ matrix.NATIVE_LIBNUT_FOLDER }}/package.json node_mod/@nut-tree/libnut-${{ matrix.NATIVE_LIBNUT_FOLDER }}
+        cp node_modules/@nut-tree/libnut-${{ matrix.NATIVE_LIBNUT_FOLDER }}/build/Release/libnut.node node_mod/@nut-tree/libnut-${{ matrix.NATIVE_LIBNUT_FOLDER }}/build/Release/
+        
+        rm -rf node_modules
+        mv node_mod node_modules
+    - name: Package to release
+      run: |
+        mkdir -p tmp/${{ env.CMD_NAME }}
+        mv index.js tmp/${{ env.CMD_NAME }}
+        mv presets.json ${{ env.CMD_NAME }}
+        mv colornames.json ${{ env.CMD_NAME }}
+        mv readme.md tmp/${{ env.CMD_NAME }}
+        mv node_modules tmp/${{ env.CMD_NAME }}
+    - uses: papeloto/action-zip@v1
+      with:
+        files: tmp/
+        dest: ${{ env.CMD_NAME }}-${{ matrix.os }}.zip
+
+    - name: Upload release assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ needs.create_release.outputs.upload_url }}
+        asset_name: ${{ env.CMD_NAME }}-${{ matrix.os }}.zip
+        asset_path: ${{ env.CMD_NAME }}-${{ matrix.os }}.zip
+        asset_content_type: application/octet-stream
