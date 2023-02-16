@@ -95,6 +95,7 @@ jobs:
         mv presets.json ${{ env.CMD_NAME }}
         mv colornames.json ${{ env.CMD_NAME }}
         mv readme.md tmp/${{ env.CMD_NAME }}
+        echo '{"repository": "http://github.com/${{ github.repository }}","filename": "${{ env.CMD_NAME }}-${{ matrix.os }}.zip","version": "${{ github.ref_name }}"}' > tmp/${{ env.CMD_NAME }}/.info
         mv node_modules tmp/${{ env.CMD_NAME }}
     - uses: papeloto/action-zip@v1
       with:
