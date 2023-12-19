@@ -60,8 +60,8 @@ class ColorPicker extends IdeckiaAction {
 		};
 	}
 
-	public function execute(currentState:ItemState):js.lib.Promise<ItemState> {
-		return new js.lib.Promise<ItemState>((resolve, reject) -> {
+	public function execute(currentState:ItemState):js.lib.Promise<ActionOutcome> {
+		return new js.lib.Promise<ActionOutcome>((resolve, reject) -> {
 			if (props.is_dynamic) {
 				isRunning = !isRunning;
 				if (isRunning) {
@@ -70,10 +70,10 @@ class ColorPicker extends IdeckiaAction {
 					timer.stop();
 					timer = null;
 				}
-				resolve(currentState);
+				resolve(new ActionOutcome({state: currentState}));
 			} else {
 				calculateColor(currentState).then(updatedState -> {
-					resolve(updatedState.state);
+					resolve(new ActionOutcome({state: updatedState.state}));
 				});
 			}
 		});
@@ -169,8 +169,8 @@ class ColorPicker extends IdeckiaAction {
 		return if (curColor != null) Some(curColor) else None;
 	}
 
-	override public function onLongPress(currentState:ItemState):js.lib.Promise<ItemState> {
-		return new js.lib.Promise<ItemState>((resolve, reject) -> {
+	override public function onLongPress(currentState:ItemState):js.lib.Promise<ActionOutcome> {
+		return new js.lib.Promise<ActionOutcome>((resolve, reject) -> {
 			currentViewMode = switch currentViewMode {
 				case name: hex;
 				case hex: rgb;
@@ -179,7 +179,7 @@ class ColorPicker extends IdeckiaAction {
 
 			calculateColor(currentState).then(updatedState -> {
 				if (updatedState.hasChanged)
-					resolve(updatedState.state);
+					resolve(new ActionOutcome({state: updatedState.state}));
 			});
 		});
 	}
