@@ -7,7 +7,7 @@ using api.IdeckiaApi;
 using StringTools;
 
 typedef Props = {
-	@:editable("Is the color updated constantly?", false)
+	@:editable("prop_is_dynamic", false)
 	var is_dynamic:Bool;
 }
 
@@ -18,7 +18,8 @@ enum ViewMode {
 }
 
 @:name("color-picker")
-@:description("Pick the color from the point where the mouse is")
+@:description("action_description")
+@:localize
 class ColorPicker extends IdeckiaAction {
 	var currentViewMode:ViewMode = name;
 	var currentColor:Color = null;
@@ -55,7 +56,7 @@ class ColorPicker extends IdeckiaAction {
 
 			calculateColor(currentItemState).then(updatedState -> {
 				if (updatedState.hasChanged)
-					server.updateClientState(updatedState.state);
+					core.updateClientState(updatedState.state);
 			});
 		};
 	}

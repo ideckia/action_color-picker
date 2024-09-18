@@ -38,7 +38,7 @@ console.log(ac)
 // put here the properties you want to test
 const props = {};
 
-const server = {
+const core = {
     log: {
         error: text => console.error(text),
         debug: text => console.debug(text),
@@ -105,7 +105,7 @@ const server = {
 };
 
 const action = new ac.IdeckiaAction();
-action.setup(props, server);
+action.setup(props, core);
 
 const itemState = {
     text: 'State text',

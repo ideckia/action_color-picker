@@ -95,6 +95,7 @@ jobs:
         mv presets.json ${{ env.CMD_NAME }}
         mv colornames.json ${{ env.CMD_NAME }}
         mv readme.md tmp/${{ env.CMD_NAME }}
+        mv loc ${{ env.CMD_NAME }}
         mv node_modules tmp/${{ env.CMD_NAME }}
         echo '{"repository": "http://github.com/${{ github.repository }}","filename": "${{ env.CMD_NAME }}.zip","version": "${{ github.ref_name }}"}' > ${{ env.CMD_NAME }}/.info
 
