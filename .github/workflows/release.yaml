@@ -69,25 +69,22 @@ jobs:
     - name: Compile project
       run: haxe deploy.hxml
 
-    - name: Install node.js dependencies
-      run: npm install
-
     - name: Get the compiled NutJs
       run: |
-        mkdir node_mod
-        mkdir node_mod/@nut-tree
+        mkdir node_modules
+        mkdir node_modules/@nut-tree
         
-        cp -r node_modules/@nut-tree/libnut node_mod/@nut-tree
-        cp -r node_modules/bindings node_mod/
-        cp -r node_modules/file-uri-to-path node_mod/
+        cp -r copy_modules/@nut-tree/libnut node_modules/@nut-tree
+        cp -r copy_modules/bindings node_modules/
+        cp -r copy_modules/file-uri-to-path node_modules/
         
-        mkdir -p node_mod/@nut-tree/libnut-${{ matrix.NATIVE_LIBNUT_FOLDER }}/build/Release
-        cp node_modules/@nut-tree/libnut-${{ matrix.NATIVE_LIBNUT_FOLDER }}/index.js node_mod/@nut-tree/libnut-${{ matrix.NATIVE_LIBNUT_FOLDER }}
-        cp node_modules/@nut-tree/libnut-${{ matrix.NATIVE_LIBNUT_FOLDER }}/package.json node_mod/@nut-tree/libnut-${{ matrix.NATIVE_LIBNUT_FOLDER }}
-        cp node_modules/@nut-tree/libnut-${{ matrix.NATIVE_LIBNUT_FOLDER }}/build/Release/libnut.node node_mod/@nut-tree/libnut-${{ matrix.NATIVE_LIBNUT_FOLDER }}/build/Release/
+        mkdir -p node_modules/@nut-tree/libnut-${{ matrix.NATIVE_LIBNUT_FOLDER }}/build/Release
+        cp copy_modules/@nut-tree/libnut-${{ matrix.NATIVE_LIBNUT_FOLDER }}/index.js node_modules/@nut-tree/libnut-${{ matrix.NATIVE_LIBNUT_FOLDER }}
+        cp copy_modules/@nut-tree/libnut-${{ matrix.NATIVE_LIBNUT_FOLDER }}/package.json node_modules/@nut-tree/libnut-${{ matrix.NATIVE_LIBNUT_FOLDER }}
+        cp copy_modules/@nut-tree/libnut-${{ matrix.NATIVE_LIBNUT_FOLDER }}/build/Release/libnut.node node_modules/@nut-tree/libnut-${{ matrix.NATIVE_LIBNUT_FOLDER }}/build/Release/
         
-        rm -rf node_modules
-        mv node_mod node_modules
+        rm -rf copy_modules
+
     - name: Package to release
       run: |
         mkdir -p tmp/${{ env.CMD_NAME }}
@@ -95,7 +92,7 @@ jobs:
         mv presets.json ${{ env.CMD_NAME }}
         mv colornames.json ${{ env.CMD_NAME }}
         mv readme.md tmp/${{ env.CMD_NAME }}
-        mv loc ${{ env.CMD_NAME }}
+        mv loc tmp/${{ env.CMD_NAME }}
         mv node_modules tmp/${{ env.CMD_NAME }}
         echo '{"repository": "http://github.com/${{ github.repository }}","filename": "${{ env.CMD_NAME }}.zip","version": "${{ github.ref_name }}"}' > ${{ env.CMD_NAME }}/.info
 
