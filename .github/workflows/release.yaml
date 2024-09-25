@@ -89,12 +89,12 @@ jobs:
       run: |
         mkdir -p tmp/${{ env.CMD_NAME }}
         mv index.js tmp/${{ env.CMD_NAME }}
-        mv presets.json ${{ env.CMD_NAME }}
-        mv colornames.json ${{ env.CMD_NAME }}
+        mv presets.json tmp/${{ env.CMD_NAME }}
+        mv colornames.json tmp/${{ env.CMD_NAME }}
         mv readme.md tmp/${{ env.CMD_NAME }}
         mv loc tmp/${{ env.CMD_NAME }}
         mv node_modules tmp/${{ env.CMD_NAME }}
-        echo '{"repository": "http://github.com/${{ github.repository }}","filename": "${{ env.CMD_NAME }}.zip","version": "${{ github.ref_name }}"}' > ${{ env.CMD_NAME }}/.info
+        echo '{"repository": "http://github.com/${{ github.repository }}","filename": "${{ env.CMD_NAME }}.zip","version": "${{ github.ref_name }}"}' > tmp/${{ env.CMD_NAME }}/.info
 
     - uses: papeloto/action-zip@v1
       with:
