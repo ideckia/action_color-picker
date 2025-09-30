@@ -48,6 +48,11 @@ class ColorPicker extends IdeckiaAction {
 		return super.init(initialState);
 	}
 
+	override function deinit() {
+		timer.stop();
+		timer = null;
+	}
+
 	function initTimer() {
 		timer = new haxe.Timer(10);
 		timer.run = () -> {
